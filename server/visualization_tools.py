@@ -19,9 +19,9 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
 import sqlite3
-from mcp.server.models import Tool
+from mcp.types import Tool
 from mcp.types import TextContent, ImageContent
-from config import DATABASE_PATH
+from config import Config
 
 # Set matplotlib style for better-looking charts
 plt.style.use('default')
@@ -32,7 +32,7 @@ class VisualizationTools:
     """Collection of visualization tools for the MCP server."""
     
     def __init__(self):
-        self.db_path = DATABASE_PATH
+        self.db_path = Config.DATABASE_PATH
     
     def _execute_query(self, query: str, params: Optional[Tuple] = None) -> pd.DataFrame:
         """Execute a database query and return results as DataFrame."""
