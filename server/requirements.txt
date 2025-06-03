@@ -1,0 +1,23 @@
+# MCP Server Dependencies
+mcp>=1.0.0
+pydantic>=2.0.0
+
+# Database
+sqlite3  # Built-in, but listed for clarity
+
+# Data Processing & Analytics
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.6.0
+plotly>=5.15.0
+seaborn>=0.12.0
+
+# Utilities
+requests>=2.28.0
+python-dateutil>=2.8.0
+
+# Development & Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0 
