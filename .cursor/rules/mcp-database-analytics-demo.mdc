@@ -1,0 +1,183 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# MCP Database Analytics Demo Implementation Guide
+
+## Project Overview
+This project implements an MCP (Model Context Protocol) demo featuring a database analytics server that provides intelligent analysis of e-commerce user behavior data. The demo showcases natural language querying, data analysis, and visualization capabilities through MCP.
+
+## Architecture
+
+```
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│   MCP Client        │◄──►│   MCP Server        │◄──►│   SQLite Database   │
+│                     │    │                     │    │                     │
+│ • Natural Language  │    │ • Database Queries  │    │ • E-commerce Data   │
+│ • Chat Interface    │    │ • Data Analysis     │    │ • User Sessions     │
+│ • Graph Display     │    │ • Visualization     │    │ • Product Data      │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+```
+
+## Dataset: UCI E-commerce Clickstream Data
+- **165,474 user sessions** from e-commerce clothing store
+- **14 features**: session_id, country, page_category, product_model, color, location, timestamps, etc.
+- **License**: Creative Commons Attribution 4.0 International
+- **URL**: https://archive.ics.uci.edu/ml/datasets/clickstream+data+for+online+shopping
+
+## Implementation Phases
+
+### Phase 1: Data Setup & Database
+**Files to create:**
+- [data/setup_database.py](mdc:data/setup_database.py) - Download and import dataset
+- [data/schema.sql](mdc:data/schema.sql) - Database schema definition  
+- [data/ecommerce.db](mdc:data/ecommerce.db) - SQLite database file
+- [data/sample_queries.sql](mdc:data/sample_queries.sql) - Test queries
+
+**Tasks:**
+1. Download UCI clickstream dataset
+2. Create SQLite database with proper schema
+3. Import and clean the data
+4. Add indexes for performance
+5. Create sample queries for testing
+
+### Phase 2: MCP Server Development
+**Files to create:**
+- [server/main.py](mdc:server/main.py) - Main MCP server entry point
+- [server/database_tools.py](mdc:server/database_tools.py) - Database query tools
+- [server/analytics_tools.py](mdc:server/analytics_tools.py) - Pre-built analytics functions
+- [server/visualization_tools.py](mdc:server/visualization_tools.py) - Chart generation tools
+- [server/requirements.txt](mdc:server/requirements.txt) - Python dependencies
+- [server/config.py](mdc:server/config.py) - Configuration settings
+
+**MCP Tools to implement:**
+
+#### Database Tools:
+- `query_database` - Execute SQL queries safely
+- `get_table_schema` - Show table structure
+- `get_sample_data` - Preview data
+- `analyze_user_behavior` - Pre-built analytics queries
+
+#### Analytics Tools:
+- `user_segmentation` - Group users by behavior patterns
+- `conversion_funnel` - Analyze purchase funnels
+- `geographic_analysis` - Country-based insights
+- `product_performance` - Product popularity analysis
+- `session_analysis` - User journey insights
+
+#### Visualization Tools:
+- `create_chart` - Generate charts (bar, line, pie, scatter)
+- `create_heatmap` - Geographic or time-based heatmaps
+- `create_funnel_chart` - Conversion funnel visualization
+
+### Phase 3: MCP Client Development
+**Files to create:**
+- [client/main.py](mdc:client/main.py) - Main client application
+- [client/chat_interface.py](mdc:client/chat_interface.py) - Natural language interface
+- [client/chart_renderer.py](mdc:client/chart_renderer.py) - Chart display functionality
+- [client/requirements.txt](mdc:client/requirements.txt) - Client dependencies
+
+**Features:**
+- Natural language query interface
+- Chart rendering (matplotlib/plotly)
+- Interactive conversation flow
+- Query history and suggestions
+
+### Phase 4: Demo Script & Documentation
+**Files to create:**
+- [demo/demo_script.py](mdc:demo/demo_script.py) - Automated demo runner
+- [demo/sample_questions.md](mdc:demo/sample_questions.md) - Example interactions
+- [README.md](mdc:README.md) - Project documentation
+- [docs/API.md](mdc:docs/API.md) - MCP server API documentation
+
+## Technical Stack
+- **Server**: Python with `mcp` package
+- **Database**: SQLite (easy setup, no dependencies)
+- **Visualization**: matplotlib + plotly for charts
+- **Client**: Python with rich CLI interface
+- **Data**: UCI E-commerce Clickstream Dataset
+
+## Example Demo Interactions
+
+```
+User: "Show me the top 5 countries by user sessions"
+→ Server executes: SELECT country, COUNT(*) FROM sessions GROUP BY country ORDER BY COUNT(*) DESC LIMIT 5
+→ Client displays: Bar chart + data table
+
+User: "What's the conversion rate by country?"
+→ Server analyzes: Purchase events vs total sessions by country
+→ Client displays: Horizontal bar chart with percentages
+
+User: "Create a chart showing daily user activity trends"
+→ Server queries: Session counts by day with time series analysis
+→ Client displays: Line chart with trend analysis
+
+User: "Which products are most popular in Germany?"
+→ Server filters: Product interactions for German users
+→ Client displays: Pie chart of product categories
+
+User: "Analyze the typical user journey from homepage to purchase"
+→ Server executes: Funnel analysis query
+→ Client displays: Sankey diagram or funnel visualization
+```
+
+## Expected Project Structure
+
+```
+MCP-demo/
+├── data/
+│   ├── setup_database.py
+│   ├── schema.sql
+│   ├── ecommerce.db
+│   └── sample_queries.sql
+├── server/
+│   ├── main.py
+│   ├── database_tools.py
+│   ├── analytics_tools.py
+│   ├── visualization_tools.py
+│   ├── config.py
+│   └── requirements.txt
+├── client/
+│   ├── main.py
+│   ├── chat_interface.py
+│   ├── chart_renderer.py
+│   └── requirements.txt
+├── demo/
+│   ├── demo_script.py
+│   └── sample_questions.md
+├── docs/
+│   └── API.md
+├── package.json
+└── README.md
+```
+
+## Key Features to Demonstrate
+1. **Smart Query Translation**: Natural language → SQL
+2. **Automatic Visualizations**: Text questions → Beautiful charts
+3. **Business Intelligence**: Pre-built analytics functions
+4. **Interactive Exploration**: Follow-up questions and drill-downs
+5. **Multi-modal Output**: Both text insights and visual charts
+
+## Development Guidelines
+- Use proper error handling for database queries
+- Implement SQL injection prevention
+- Cache frequently used queries for performance
+- Create modular, testable code
+- Follow MCP protocol specifications exactly
+- Include comprehensive logging for debugging
+- Add input validation for all user queries
+
+## Performance Considerations
+- Index key columns (session_id, country, timestamp)
+- Limit result sets for large queries
+- Implement query timeouts
+- Cache visualization data temporarily
+- Use prepared statements for security
+
+## Security Notes
+- Sanitize all SQL inputs
+- Use parameterized queries only
+- Limit database permissions
+- Validate chart generation inputs
+- Implement rate limiting for queries
