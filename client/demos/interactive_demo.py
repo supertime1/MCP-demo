@@ -4,6 +4,8 @@ Interactive MCP Database Analytics Demo
 
 This script provides a working demonstration of the MCP database analytics
 capabilities with a simple menu-driven interface.
+
+This is the production demo - for testing demo functionality, see tests/test_interactive_demo.py
 """
 
 import asyncio
@@ -18,7 +20,7 @@ class AnalyticsDemo:
     """Interactive demo for MCP database analytics"""
     
     def __init__(self):
-        self.server_path = Path(__file__).parent.parent / "server" / "main.py"
+        self.server_path = Path(__file__).parent.parent.parent / "server" / "main.py"
         self.server_params = StdioServerParameters(
             command="python",
             args=[str(self.server_path)],
