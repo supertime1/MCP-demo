@@ -1,0 +1,26 @@
+# MCP Client Dependencies
+mcp>=1.0.0
+pydantic>=2.0.0
+
+# User Interface & Interaction
+rich>=13.0.0
+click>=8.0.0
+prompt-toolkit>=3.0.0
+
+# Chart Display & Visualization
+matplotlib>=3.6.0
+plotly>=5.15.0
+pillow>=9.0.0
+
+# Data Processing (for handling server responses)
+pandas>=1.5.0
+numpy>=1.24.0
+
+# Utilities
+requests>=2.28.0
+python-dateutil>=2.8.0
+asyncio-mqtt>=0.11.0
+
+# Development & Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0 

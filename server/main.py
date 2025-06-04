@@ -10,7 +10,7 @@ import logging
 from typing import Any, Sequence
 import json
 
-from mcp.server import Server
+from mcp.server.lowlevel import Server
 from mcp.types import (
     Resource,
     Tool,
@@ -127,53 +127,50 @@ async def handle_list_tools() -> ListToolsResult:
     return ListToolsResult(tools=all_tools)
 
 @server.call_tool()
-async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
+async def handle_call_tool(name: str, arguments: dict) -> list:
     """Handle tool execution requests."""
     try:
-        tool_name = request.params.name
-        arguments = request.params.arguments or {}
-        
-        logger.info(f"Executing tool: {tool_name} with args: {arguments}")
+        logger.info(f"Executing tool: {name} with args: {arguments}")
         
         # Database Tools
-        if tool_name == "query_database":
+        if name == "query_database":
             result = await query_database(arguments.get("query", ""))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
-        elif tool_name == "get_table_schema":
+        elif name == "get_table_schema":
             result = await get_table_schema(arguments.get("table_name", ""))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
-        elif tool_name == "get_sample_data":
+        elif name == "get_sample_data":
             result = await get_sample_data(
                 arguments.get("table_name", ""),
                 arguments.get("limit", 5)
             )
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
-        elif tool_name == "analyze_user_behavior":
+        elif name == "analyze_user_behavior":
             result = await analyze_user_behavior(arguments.get("analysis_type", "overview"))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
         # Analytics Tools
-        elif tool_name == "user_segmentation":
+        elif name == "user_segmentation":
             result = await user_segmentation(arguments.get("segmentation_type", "engagement"))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
-        elif tool_name == "conversion_funnel":
+        elif name == "conversion_funnel":
             result = await conversion_funnel(arguments.get("funnel_type", "standard"))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
-        elif tool_name == "geographic_analysis":
+        elif name == "geographic_analysis":
             result = await geographic_analysis(arguments.get("analysis_type", "overview"))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
-        elif tool_name == "product_performance":
+        elif name == "product_performance":
             result = await product_performance(arguments.get("analysis_type", "popularity"))
-            return CallToolResult(content=[TextContent(type="text", text=result)])
+            return [TextContent(type="text", text=result)]
         
         # Visualization Tools
-        elif tool_name == "create_chart":
+        elif name == "create_chart":
             result = await viz_tools.create_chart(
                 data_query=arguments.get("data_query", ""),
                 chart_type=arguments.get("chart_type", "bar"),
@@ -183,9 +180,9 @@ async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
                 aggregation=arguments.get("aggregation", "sum"),
                 limit=arguments.get("limit", 20)
             )
-            return CallToolResult(content=result)
+            return result
         
-        elif tool_name == "create_heatmap":
+        elif name == "create_heatmap":
             result = await viz_tools.create_heatmap(
                 data_query=arguments.get("data_query", ""),
                 title=arguments.get("title", "Heatmap"),
@@ -195,18 +192,18 @@ async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
                 aggregation=arguments.get("aggregation", "sum"),
                 colormap=arguments.get("colormap", "YlOrRd")
             )
-            return CallToolResult(content=result)
+            return result
         
-        elif tool_name == "create_funnel_chart":
+        elif name == "create_funnel_chart":
             result = await viz_tools.create_funnel_chart(
                 stages_query=arguments.get("stages_query", ""),
                 title=arguments.get("title", "Conversion Funnel"),
                 stage_column=arguments.get("stage_column", "stage"),
                 value_column=arguments.get("value_column", "count")
             )
-            return CallToolResult(content=result)
+            return result
         
-        elif tool_name == "create_time_series":
+        elif name == "create_time_series":
             result = await viz_tools.create_time_series(
                 data_query=arguments.get("data_query", ""),
                 title=arguments.get("title", "Time Series"),
@@ -214,16 +211,14 @@ async def handle_call_tool(request: CallToolRequest) -> CallToolResult:
                 value_column=arguments.get("value_column", "value"),
                 groupby_column=arguments.get("groupby_column")
             )
-            return CallToolResult(content=result)
+            return result
         
         else:
-            raise ValueError(f"Unknown tool: {tool_name}")
+            raise ValueError(f"Unknown tool: {name}")
     
     except Exception as e:
         logger.error(f"Tool execution failed: {e}")
-        return CallToolResult(
-            content=[TextContent(type="text", text=f"Error executing tool '{tool_name}': {str(e)}")]
-        )
+        return [TextContent(type="text", text=f"Error executing tool '{name}': {str(e)}")]
 
 async def main():
     """Main entry point for the MCP server."""
@@ -249,11 +244,28 @@ async def main():
         logger.error(f"Database connection failed: {e}")
         logger.error("Server may not function properly without database access")
     
+    # Import the correct server module
+    import mcp.server.stdio
+    from mcp.server.models import InitializationOptions
+    from mcp.server.lowlevel import NotificationOptions
+    
     # Run the server using stdio transport
-    async with server.run_stdio() as streams:
+    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         logger.info("MCP Server is running and ready for connections")
         logger.info("Server capabilities: resources=True, tools=True, prompts=False")
-        await streams.wait_for_close()
+        
+        await server.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name="database-analytics-server",
+                server_version="1.0.0",
+                capabilities=server.get_capabilities(
+                    notification_options=NotificationOptions(),
+                    experimental_capabilities={},
+                ),
+            ),
+        )
 
 if __name__ == "__main__":
     """

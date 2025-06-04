@@ -496,16 +496,16 @@ class AnalyticsService:
             if analysis_type == "overview":
                 query = """
                 SELECT 
-                    country,
-                    COUNT(DISTINCT session_id) as unique_sessions,
+                    cs.country,
+                    COUNT(DISTINCT cs.session_id) as unique_sessions,
                     COUNT(*) as total_clicks,
-                    ROUND(AVG(total_clicks), 2) as avg_clicks_per_session,
+                    ROUND(AVG(us.total_clicks), 2) as avg_clicks_per_session,
                     ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as click_share,
-                    ROUND(COUNT(DISTINCT session_id) * 100.0 / SUM(COUNT(DISTINCT session_id)) OVER(), 2) as session_share
+                    ROUND(COUNT(DISTINCT cs.session_id) * 100.0 / SUM(COUNT(DISTINCT cs.session_id)) OVER(), 2) as session_share
                 FROM clickstream cs
                 JOIN user_sessions us ON cs.session_id = us.session_id
-                GROUP BY country
-                HAVING COUNT(DISTINCT session_id) >= 5
+                GROUP BY cs.country
+                HAVING COUNT(DISTINCT cs.session_id) >= 5
                 ORDER BY unique_sessions DESC
                 LIMIT 15
                 """
